@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {PushEvent} from '@octokit/webhooks-definitions/schema'
+import {PushEvent} from '@octokit/webhooks-types/schema'
 
 async function run() {
     if (github.context.eventName !== 'push') {
