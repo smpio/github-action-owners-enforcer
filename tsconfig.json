@@ -1,18 +1,14 @@
 {
     "compilerOptions": {
       "target": "es2019",
+      "lib": ["esnext"],
       "module": "commonjs",
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
       "outDir": "dist",
-      "lib": ["esnext"]
+      "types": ["node"]
     },
-    "references": [
-      {
-        "path": "./tsconfig.build.json"
-      }
-    ],
-    "exclude": ["node_modules"]
+    "include": ["src"],
   }
