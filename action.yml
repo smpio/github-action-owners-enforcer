@@ -1,0 +1,8 @@
+name: OWNERS enforcer
+author: Dmitry Bashkatov
+description: |
+  If some files in "staging" branch were pushed by non-OWNERS, this action will hard reverse changes in the branch,
+  otherwise it will push them to "production" branch.
+runs:
+  using: node16
+  main: dist/index.js
