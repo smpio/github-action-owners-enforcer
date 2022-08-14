@@ -14,7 +14,7 @@ async function run() {
     const ref = pushPayload.ref;
     const beforeSha = pushPayload.before;
     const afterSha = pushPayload.after;
-    core.info(`ref=${ref} beforeSha=${beforeSha} afterSha=${afterSha}`);
+    core.info(`ref=${ref}\nbeforeSha=${beforeSha}\nafterSha=${afterSha}`);
 
     // This should be a token with access to your repository scoped in as a secret.
     // The YML workflow will need to set myToken with the GitHub Secret Token
