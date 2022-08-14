@@ -7,6 +7,9 @@ inputs:
   token:
     desctiption: GitHub token (use `secrets.GITHUB_TOKEN`) for the repo.
     required: true
+  ownersPath:
+    description: OWNERS file path in the repo.
+    default: OWNERS
 runs:
   using: node16
   main: dist/index.js

@@ -20,8 +20,18 @@ async function run() {
     // with:
     //   token: ${{ secrets.GITHUB_TOKEN }}
     // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
-    const token = core.getInput('token');
+    const token = core.getInput('token', {required: true});
     const octokit = github.getOctokit(token);
+
+    const ownersFilePath = core.getInput('ownersPath', {required: true});
+    const ownersFile = await octokit.rest.repos.getContent({
+      owner: pushPayload.repository.owner.login,
+      repo: pushPayload.repository.name,
+      path: ownersFilePath,
+      ref: beforeSha,
+    });
+
+    console.dir(ownersFile);
 }
 
 run();
