@@ -51,7 +51,8 @@ async function run() {
 
       const ownersData = Buffer.from(ownersFile.data.content, 'base64').toString();
       console.log(ownersData);
-    } catch (err) {
+    }
+    catch (err) {
       if (err instanceof RequestError && err.status === 404) {
         core.setFailed(`File ${ownersFilePath} does not exist`);
         return;
