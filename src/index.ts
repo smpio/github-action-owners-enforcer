@@ -16,12 +16,12 @@ async function run() {
     if (push.pusher.email) {
       pusherNames.push(push.pusher.email);
     }
-    core.info(`Pusher: ${pusherNames.join(' aka ')}`);
+    core.info(`pusher: ${pusherNames.join(' aka ')}`);
 
     const ref = push.ref;
     const beforeSha = push.before;
     const afterSha = push.after;
-    core.info(`ref=${ref}\nbeforeSha=${beforeSha}\nafterSha=${afterSha}`);
+    core.info(`ref: ${ref}\nbeforeSha: ${beforeSha}\nafterSha: ${afterSha}`);
 
     const token = core.getInput('token', {required: true});
     const octokit = github.getOctokit(token);
