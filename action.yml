@@ -3,6 +3,10 @@ author: Dmitry Bashkatov
 description: |
   If some files in "staging" branch were pushed by non-OWNERS, this action will hard reverse changes in the branch,
   otherwise it will push them to "production" branch.
+inputs:
+  token:
+    desctiption: GitHub token (use `${{ secrets.GITHUB_TOKEN }}`) for the repo.
+    required: true
 runs:
   using: node16
   main: dist/index.js
