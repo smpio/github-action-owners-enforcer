@@ -33,7 +33,24 @@ async function run() {
         ref: beforeSha,
       });
 
-      console.dir(ownersFile);
+      if (ownersFile.data instanceof Array || !('content' in ownersFile.data)) {
+        core.setFailed(`Unexpected ${ownersFilePath} getContent response`);
+        console.dir(ownersFile);
+        return;
+      }
+
+      if (ownersFile.data.type !== 'file') {
+        core.setFailed(`Unexpected ${ownersFilePath} type: ${ownersFile.data.type}`);
+        return;
+      }
+
+      if (ownersFile.data.encoding !== 'base64') {
+        core.setFailed(`Unexpected ${ownersFilePath} getContent response encoding: ${ownersFile.data.encoding}`);
+        return;
+      }
+
+      const ownersData = Buffer.from(ownersFile.data.content, 'base64').toString();
+      console.log(ownersData);
     } catch (err) {
       if (err instanceof RequestError && err.status === 404) {
         core.setFailed(`File ${ownersFilePath} does not exist`);
