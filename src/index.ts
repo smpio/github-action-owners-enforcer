@@ -10,7 +10,6 @@ async function run() {
     }
 
     const push = github.context.payload as PushEvent;
-    console.dir(push);
 
     const pusherNames = ['@'+push.pusher.name];
     if (push.pusher.email) {
@@ -50,7 +49,7 @@ async function run() {
       if (!files) continue;
       for (let file of files) {
         const ok = pusherNames.some(name => owners.isOwner(name, file.filename));
-        core.info(` * ${file.sha} ${file.filename} ${ok ? 'OK' : 'OWNERSHIP FAILURE'}`);
+        core.info(` * ${file.filename} ${ok ? 'OK' : 'OWNERSHIP FAILURE'}`);
         if (!ok) {
           return;
         }
