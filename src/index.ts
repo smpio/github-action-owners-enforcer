@@ -45,7 +45,7 @@ async function run() {
         repo: push.repository.name,
         ref: commitRef.id,
       });
-      core.info(commit.data.commit.message);
+      core.info(`> ${commit.data.commit.message}`);
       const files = commit.data.files;
       if (!files) continue;
       for (let file of files) {
