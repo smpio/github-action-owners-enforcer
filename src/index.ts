@@ -35,19 +35,24 @@ async function run() {
       beforeSha
     );
 
-    const changed = new Set<string>();
-    for (let commit of push.commits) {
-      for (let path in [...commit.added, ...commit.modified, ...commit.removed]) {
-        changed.add(path);
+    // push.commit.added, push.commit.modified, push.commit.removed are undefined for some reason
+    // so we load each commit
+    for (let commitRef of push.commits) {
+      const commit = await octokit.rest.repos.getCommit({
+        owner: push.repository.owner.login,
+        repo: push.repository.name,
+        ref: commitRef.id,
+      });
+      const files = commit.data.files;
+      if (!files) continue;
+      for (let file of files) {
+        core.info(` * ${file.filename}`);
+        if (!pusherNames.some(name => owners.isOwner(name, file.filename))) {
+          throw new Error(`${pusherNames.join(' aka ')} is not authorized to change ${file.filename}`);
+        }
       }
     }
-
-    core.info(['Changed files:', ...changed].join('\n * '));
-    for (let path of changed) {
-      if (!pusherNames.some(name => owners.isOwner(name, path))) {
-        throw new Error(`${pusherNames.join(' aka ')} is not authorized to change ${path}`);
-      }
-    }
+    core.info('\n');
 }
 
 run();
