@@ -10,6 +10,8 @@ async function run() {
     }
 
     const push = github.context.payload as PushEvent;
+    console.dir(push);
+
     const pusherNames = ['@'+push.pusher.name];
     if (push.pusher.email) {
       pusherNames.push(push.pusher.email);
