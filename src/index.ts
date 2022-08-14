@@ -55,7 +55,6 @@ async function run() {
         }
       }
     }
-    core.info('\n');
 }
 
 run();
