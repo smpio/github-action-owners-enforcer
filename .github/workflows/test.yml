@@ -18,3 +18,5 @@ jobs:
     - run: npm ci
     - run: npm run build
     - uses: ./
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
