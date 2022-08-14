@@ -36,7 +36,7 @@ async function run() {
       console.dir(ownersFile);
     } catch (err) {
       if (err instanceof RequestError && err.status === 404) {
-        core.error(`File ${ownersFilePath} does not exist`);
+        core.setFailed(`File ${ownersFilePath} does not exist`);
         return;
       } else {
         throw err;
