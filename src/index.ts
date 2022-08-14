@@ -36,7 +36,7 @@ async function run() {
       beforeSha
     );
 
-    // push.commit.added, push.commit.modified, push.commit.removed are undefined for some reason
+    // push.commits[].{added,modified,removed} are undefined for some reason
     // so we load each commit
     for (let commitRef of push.commits) {
       core.info(`commit ${commitRef.id}`);
