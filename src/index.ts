@@ -4,12 +4,17 @@ import {PushEvent} from '@octokit/webhooks-types/schema'
 
 async function run() {
     if (github.context.eventName !== 'push') {
-      core.info(`Unexpected event: ${github.context.eventName}), exiting`);
+      core.error(`Unexpected event: ${github.context.eventName})`);
       return;
     }
 
     const pushPayload = github.context.payload as PushEvent;
-    core.info(`The head commit is: ${pushPayload.head_commit}`);
+    if (!pushPayload.head_commit) {
+      core.error('No HEAD commit data');
+      return;
+    }
+
+    core.info(`The HEAD commit is: id=${pushPayload.head_commit.id} tree_id=${pushPayload.head_commit.tree_id}`);
 
     // This should be a token with access to your repository scoped in as a secret.
     // The YML workflow will need to set myToken with the GitHub Secret Token
