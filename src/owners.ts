@@ -19,7 +19,7 @@ export class Owners {
   isOwner(who: string, path: string): boolean {
     return this.entries.some(entry => {
       if (entry.owners.indexOf(who) === -1) return false;
-      return minimatch(path, entry.glob, {matchBase: true});
+      return minimatch(path, entry.glob, {matchBase: true, nocomment: true});
     });
   }
 
@@ -61,8 +61,12 @@ export class Owners {
     let entries: Entry[] = [];
     for (let line of data.split('\n')) {
       line = line.trim();
+      if (line[0] === '#') continue;
       if (line.length === 0) continue;
       let [glob, ...owners] = line.split(/\s+/);
+      if (glob.endsWith('/')) {
+        glob += '*';
+      }
       entries.push({glob, owners});
     }
     return new this(entries);
