@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {PushEvent} from '@octokit/webhooks-types/schema'
-import {RequestError} from '@octokit/request-error'
+import {Owners} from './owners'
 
 async function run() {
     if (github.context.eventName !== 'push') {
@@ -9,55 +9,41 @@ async function run() {
       return;
     }
 
-    const pushPayload = github.context.payload as PushEvent;
+    const push = github.context.payload as PushEvent;
+    const pusherNames = ['@'+push.pusher.name];
+    if (push.pusher.email) {
+      pusherNames.push(push.pusher.email);
+    }
+    core.info(`Pusher: ${pusherNames.join(' aka ')}`);
 
-    const ref = pushPayload.ref;
-    const beforeSha = pushPayload.before;
-    const afterSha = pushPayload.after;
+    const ref = push.ref;
+    const beforeSha = push.before;
+    const afterSha = push.after;
     core.info(`ref=${ref}\nbeforeSha=${beforeSha}\nafterSha=${afterSha}`);
 
-    // This should be a token with access to your repository scoped in as a secret.
-    // The YML workflow will need to set myToken with the GitHub Secret Token
-    // with:
-    //   token: ${{ secrets.GITHUB_TOKEN }}
-    // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
     const token = core.getInput('token', {required: true});
     const octokit = github.getOctokit(token);
 
     const ownersFilePath = core.getInput('ownersPath', {required: true});
-    try {
-      const ownersFile = await octokit.rest.repos.getContent({
-        owner: pushPayload.repository.owner.login,
-        repo: pushPayload.repository.name,
-        path: ownersFilePath,
-        ref: beforeSha,
-      });
+    const owners = await Owners.load(
+      octokit,
+      push.repository.owner.login,
+      push.repository.name,
+      ownersFilePath,
+      beforeSha
+    );
 
-      if (ownersFile.data instanceof Array || !('content' in ownersFile.data)) {
-        core.setFailed(`Unexpected ${ownersFilePath} getContent response`);
-        console.dir(ownersFile);
-        return;
+    const changed = new Set<string>();
+    for (let commit of push.commits) {
+      for (let path in [...commit.added, ...commit.modified, ...commit.removed]) {
+        changed.add(path);
       }
-
-      if (ownersFile.data.type !== 'file') {
-        core.setFailed(`Unexpected ${ownersFilePath} type: ${ownersFile.data.type}`);
-        return;
-      }
-
-      if (ownersFile.data.encoding !== 'base64') {
-        core.setFailed(`Unexpected ${ownersFilePath} getContent response encoding: ${ownersFile.data.encoding}`);
-        return;
-      }
-
-      const ownersData = Buffer.from(ownersFile.data.content, 'base64').toString();
-      console.log(ownersData);
     }
-    catch (err) {
-      if (err instanceof RequestError && err.status === 404) {
-        core.setFailed(`File ${ownersFilePath} does not exist`);
-        return;
-      } else {
-        throw err;
+
+    core.info(['Changed files:', ...changed].join('\n * '));
+    for (let path of changed) {
+      if (!pusherNames.some(name => owners.isOwner(name, path))) {
+        throw new Error(`${pusherNames.join(' aka ')} is not authorized to change ${path}`);
       }
     }
 }
