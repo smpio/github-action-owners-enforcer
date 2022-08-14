@@ -50,7 +50,7 @@ async function run() {
       if (!files) continue;
       for (let file of files) {
         const ok = pusherNames.some(name => owners.isOwner(name, file.filename));
-        core.info(` * ${file.filename} ${ok ? 'OK' : 'OWNERSHIP FAILURE'}`);
+        core.info(` * ${file.filename}\t ${ok ? 'OK' : 'OWNERSHIP FAILURE'}`);
         if (!ok) {
           return;
         }
