@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {PushEvent} from '@octokit/webhooks-types/schema'
+import {RequestError} from '@octokit/request-error'
 
 async function run() {
     if (github.context.eventName !== 'push') {
@@ -24,14 +25,23 @@ async function run() {
     const octokit = github.getOctokit(token);
 
     const ownersFilePath = core.getInput('ownersPath', {required: true});
-    const ownersFile = await octokit.rest.repos.getContent({
-      owner: pushPayload.repository.owner.login,
-      repo: pushPayload.repository.name,
-      path: ownersFilePath,
-      ref: beforeSha,
-    });
+    try {
+      const ownersFile = await octokit.rest.repos.getContent({
+        owner: pushPayload.repository.owner.login,
+        repo: pushPayload.repository.name,
+        path: ownersFilePath,
+        ref: beforeSha,
+      });
 
-    console.dir(ownersFile);
+      console.dir(ownersFile);
+    } catch (err) {
+      if (err instanceof RequestError && err.status === 404) {
+        core.error(`File ${ownersFilePath} does not exist`);
+        return;
+      } else {
+        throw err;
+      }
+    }
 }
 
 run();
