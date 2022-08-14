@@ -38,6 +38,7 @@ async function run() {
     // push.commit.added, push.commit.modified, push.commit.removed are undefined for some reason
     // so we load each commit
     for (let commitRef of push.commits) {
+      core.info(`commit ${commitRef.id}`);
       const commit = await octokit.rest.repos.getCommit({
         owner: push.repository.owner.login,
         repo: push.repository.name,
@@ -46,7 +47,7 @@ async function run() {
       const files = commit.data.files;
       if (!files) continue;
       for (let file of files) {
-        core.info(` * ${file.filename}`);
+        core.info(` * ${file.sha} ${file.filename}`);
         if (!pusherNames.some(name => owners.isOwner(name, file.filename))) {
           throw new Error(`${pusherNames.join(' aka ')} is not authorized to change ${file.filename}`);
         }
