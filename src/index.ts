@@ -21,7 +21,9 @@ async function run() {
     const ref = push.ref;
     const beforeSha = push.before;
     const afterSha = push.after;
-    core.info(`ref: ${ref}\nbeforeSha: ${beforeSha}\nafterSha: ${afterSha}`);
+    core.info(`ref: ${ref}`);
+    core.info(`before sha: ${beforeSha}`);
+    core.info(`after sha:  ${afterSha}`);
 
     const token = core.getInput('token', {required: true});
     const octokit = github.getOctokit(token);
@@ -47,9 +49,10 @@ async function run() {
       const files = commit.data.files;
       if (!files) continue;
       for (let file of files) {
-        core.info(` * ${file.sha} ${file.filename}`);
-        if (!pusherNames.some(name => owners.isOwner(name, file.filename))) {
-          throw new Error(`${pusherNames.join(' aka ')} is not authorized to change ${file.filename}`);
+        const ok = pusherNames.some(name => owners.isOwner(name, file.filename));
+        core.info(` * ${file.sha} ${file.filename} ${ok ? 'OK' : 'OWNERSHIP FAILURE'}`);
+        if (!ok) {
+          return;
         }
       }
     }
