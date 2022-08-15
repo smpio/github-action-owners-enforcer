@@ -78,16 +78,14 @@ async function run() {
   if (isOwnershipOk) {
     const targetRef = 'refs/heads/' + targetBranchName;
     console.log(`Pushing ${ref} to ${targetRef}`);
-    await octokit.rest.git.updateRef({
+    await octokit.request('PATCH /repos/{owner}/{repo}/git/' + targetRef, {
       ...repo,
-      ref: targetRef,
       sha: afterSha,
     });
   } else {
     console.log(`Force pushing ${ref} back to ${beforeSha}`);
-    await octokit.rest.git.updateRef({
+    await octokit.request('PATCH /repos/{owner}/{repo}/git/' + ref, {
       ...repo,
-      ref: ref,
       sha: beforeSha,
       force: true,
     });
