@@ -24,12 +24,26 @@ async function run() {
   const ref = push.ref;
   const beforeSha = push.before;
   const afterSha = push.after;
-  console.log(`ref: ${ref}`);
+  console.log(`source ref: ${ref}`);
   console.log(`before sha: ${beforeSha}`);
   console.log(`after sha:  ${afterSha}`);
 
   const token = core.getInput('token', {required: true});
   const octokit = github.getOctokit(token);
+
+  const targetBranchName = core.getInput('targetBranch', {required: true});
+  const targetBranch = await octokit.rest.repos.getBranch({
+    ...repo,
+    branch: targetBranchName,
+  });
+  const targetHead = targetBranch.data.commit.sha;
+
+  console.log(`target ref: refs/heads/${targetBranchName}`);
+  console.log(`target sha: ${targetHead}`);
+
+  if (targetHead !== beforeSha) {
+    throw new Error(`Target branch commit is not the same as previous commit in source (before sha != target sha)`);
+  }
 
   const ownersFilePath = core.getInput('ownersPath', {required: true});
   const owners = await Owners.load(octokit, {
@@ -62,7 +76,7 @@ async function run() {
   })();
 
   if (isOwnershipOk) {
-    const targetRef = 'refs/heads/' + core.getInput('targetBranch', {required: true});
+    const targetRef = 'refs/heads/' + targetBranchName;
     console.log(`Pushing ${ref} to ${targetRef}`);
   } else {
     console.log(`Force pushing ${ref} back to ${beforeSha}`);
