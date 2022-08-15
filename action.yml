@@ -10,6 +10,9 @@ inputs:
   ownersPath:
     description: OWNERS file path in the repo.
     default: OWNERS
+  targetBranch:
+    description: Name of the branch where all authorized commits will be pushed.
+    required: true
 runs:
   using: node16
   main: dist/index.js

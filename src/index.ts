@@ -62,7 +62,7 @@ async function run() {
   })();
 
   if (isOwnershipOk) {
-    const targetRef = 'qwe';
+    const targetRef = 'refs/heads/' + core.getInput('targetBranch', {required: true});
     console.log(`Pushing ${ref} to ${targetRef}`);
   } else {
     console.log(`Force pushing ${ref} back to ${beforeSha}`);
