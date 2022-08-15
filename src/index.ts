@@ -39,23 +39,33 @@ async function run() {
   });
 
   // push.commits[].{added,modified,removed} are undefined for some reason
-  // so we load each commit
-  for (let commitRef of push.commits) {
-    core.info(`commit ${commitRef.id}`);
-    const commit = await octokit.rest.repos.getCommit({
-      ...repo,
-      ref: commitRef.id,
-    });
-    core.info(`> ${commit.data.commit.message}`);
-    const files = commit.data.files;
-    if (!files) continue;
-    for (let file of files) {
-      const ok = pusherNames.some(name => owners.isOwner(name, file.filename));
-      core.info(` * ${file.filename}\t ${ok ? 'OK' : 'OWNERSHIP FAILURE'}`);
-      if (!ok) {
-        return;
+  // so we need to load each commit
+  const isOwnershipOk = await (async () => {
+    for (let commitRef of push.commits) {
+      core.info(`commit ${commitRef.id}`);
+      const commit = await octokit.rest.repos.getCommit({
+        ...repo,
+        ref: commitRef.id,
+      });
+      core.info(`> ${commit.data.commit.message}`);
+      const files = commit.data.files;
+      if (!files) continue;
+      for (let file of files) {
+        const ok = pusherNames.some(name => owners.isOwner(name, file.filename));
+        core.info(` * ${file.filename}\t ${ok ? 'OK' : 'OWNERSHIP FAILURE'}`);
+        if (!ok) {
+          return false;
+        }
       }
     }
+    return true;
+  })();
+
+  if (isOwnershipOk) {
+    const targetRef = 'qwe';
+    console.log(`Pushing ${ref} to ${targetRef}`);
+  } else {
+    console.log(`Force pushing ${ref} back to ${beforeSha}`);
   }
 }
 
