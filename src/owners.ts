@@ -23,7 +23,7 @@ export class Owners {
     });
   }
 
-  static async load(octokit: Octokit, owner: string, repo: string, path: string, ref: string): Promise<Owners> {
+  static async load(octokit: Octokit, {owner, repo, path, ref}: {owner: string, repo: string, path: string, ref: string}): Promise<Owners> {
     let ownersData;
 
     try {

@@ -17,6 +17,10 @@ async function run() {
     }
     core.info(`pusher: ${pusherNames.join(' aka ')}`);
 
+    const repo = {
+      owner: push.repository.owner.login,
+      repo: push.repository.name,
+    };
     const ref = push.ref;
     const beforeSha = push.before;
     const afterSha = push.after;
@@ -28,21 +32,18 @@ async function run() {
     const octokit = github.getOctokit(token);
 
     const ownersFilePath = core.getInput('ownersPath', {required: true});
-    const owners = await Owners.load(
-      octokit,
-      push.repository.owner.login,
-      push.repository.name,
-      ownersFilePath,
-      beforeSha
-    );
+    const owners = await Owners.load(octokit, {
+      ...repo,
+      path: ownersFilePath,
+      ref: beforeSha,
+    });
 
     // push.commits[].{added,modified,removed} are undefined for some reason
     // so we load each commit
     for (let commitRef of push.commits) {
       core.info(`commit ${commitRef.id}`);
       const commit = await octokit.rest.repos.getCommit({
-        owner: push.repository.owner.login,
-        repo: push.repository.name,
+        ...repo,
         ref: commitRef.id,
       });
       core.info(`> ${commit.data.commit.message}`);
