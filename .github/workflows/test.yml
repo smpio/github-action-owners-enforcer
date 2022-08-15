@@ -2,10 +2,7 @@ name: Test
 on:
   push:
     branches:
-    - master
-  pull_request:
-    branches:
-    - master
+    - staging
 jobs:
   run-action:
     name: Run the action
@@ -21,3 +18,4 @@ jobs:
     - uses: ./
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        targetBranch: master
